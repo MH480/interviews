@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Questions</title>
+    <style>
+        .code-example {
+            --code-action-color: var(--text-secondary);
+            position: relative;
+            margin: auto;
+            padding: 24px;
+            max-width: 60%;
+        }
+
+        .result {
+            position: fixed;
+            margin: 8px;
+            padding: 24px;
+            max-width: 60%;
+            left: 0;
+            top: 0;
+        }
+
+        .code-example,
+        code,
+        pre {
+            border-radius: 2px;
+            font-family: code;
+            font-size: 14;
+        }
+
+        *,
+        ::after,
+        ::before {
+            box-sizing: border-box;
+        }
+
+        example .example-header~pre {
+            border-top: none;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            margin-top: 0;
+        }
+
+        pre {
+            background-color: #313131;
+            border: 1px solid transparent;
+            border-top-width: 1px;
+            border-top-style: solid;
+            border-top-color: transparent;
+            margin: 1rem 0 2rem;
+            margin-top: 1rem;
+            padding: 1rem 2.5rem 1rem 1rem;
+        }
+
+        .code-example,
+        code,
+        pre {
+            border-radius: 5px;
+            font-family: var(--font-code);
+            font-size: var(--type-smaller-font-size);
+        }
+
+        pre {
+            white-space: pre-wrap;
+            white-space: -moz-pre-wrap;
+            white-space: -pre-wrap;
+            white-space: -o-pre-wrap;
+            word-wrap: break-word;
+            color: azure;
+        }
+
+        button {
+            padding: 8px;
+            border-radius: 2px;
+            display: inline-block;
+        }
+
+        *,
+        ::after,
+        ::before {
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="codes">
+
+    </div>
+    <div id="result" class="result">
+        <h3>Result:<strong>
+                <script>
+                    if (localStorage.length > 0)
+                        localStorage.key(0)
+                </script>
+            </strong></h3>
+    </div>
+    <script src="bind.js"></script>
+    <script>
+        function loadFile(filePath, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    callback(xhr.responseText);
+                }
+            };
+            xhr.open("GET", filePath, true);
+            xhr.send();
+        }
+        function bindFinctionClicked() {
+            bindFunction();
+            console.log("Testing button clicked.");
+        }
+        function protoChainingFunctionClicked() {
+            protoChainingFunction();
+            console.log("Testing button clicked.");
+        }
+
+        function loadFunctions() {
+            loadFile("bind.js", function (responseText) {
+                // Display content in a <pre> element
+                const splitter = '//function';
+
+                const clickFunctionsArray = [bindFinctionClicked, protoChainingFunctionClicked]
+                responseText.split(splitter).forEach((chunk, index) => {
+                    const funcName = chunk.match(/^\/{2}#[\w\s]+\s*$/gm).map(x => x.replace('//#', ''))[0];
+                    console.log('loaded Function', funcName);
+                    const code = document.createElement("div");
+                    code.setAttribute('class', 'code-example')
+
+                    const codeHeader = document.createElement("p");
+                    codeHeader.setAttribute('class', 'example-header')
+                    codeHeader.textContent = funcName;
+
+                    code.appendChild(codeHeader)
+
+
+                    const codeContent = document.createElement("pre");
+                    codeContent.setAttribute('class', 'brush: js notranslate')
+                    codeContent.textContent = chunk;
+                    code.appendChild(codeContent)
+
+
+                    let onclick = eval("(" + chunk + ")");
+                    const btnRun = document.createElement("button");
+                    btnRun.textContent = `run ${funcName} test`
+                    btnRun.onclick = onclick;
+                    code.appendChild(btnRun)
+
+                    document.getElementById('codes').appendChild(code);
+                })
+            });
+        };
+
+        window.onload = function (params) {
+            loadFunctions();
+        }
+    </script>
+</body>
+
+</html>
