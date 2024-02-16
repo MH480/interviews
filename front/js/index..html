@@ -37,11 +37,49 @@
             box-sizing: border-box;
         }
 
-        example .example-header~pre {
+        .code-example .example-header {
+            border-top-left-radius: 2px;
+            border-top-right-radius: 2px;
+            padding: 8px;
+            margin: 0px;
+            background-color: #313131;
+            color: rgb(213, 211, 211);
+
+        }
+
+        .code-example .example-header~pre {
             border-top: none;
             border-top-left-radius: 0;
             border-top-right-radius: 0;
             margin-top: 0;
+            background-color: #313131;
+        }
+
+        .code-example .example-header .btn-copy {
+            width: fit-content;
+            height: fit-content;
+            float: inline-end;
+            display: block;
+            cursor: pointer;
+            font-size: 0.7rem;
+            padding: 4px;
+            font-family: inherit;
+            background-color: inherit;
+            border-color: #313131;
+            border-width: 0px;
+            color: aliceblue;
+        }
+
+
+        .code-example .example-header p {
+            border-top-left-radius: 2px;
+            border-top-right-radius: 2px;
+            background-color: #313131;
+            border-bottom-color: #929292;
+            border-bottom-width: 1px;
+            border-bottom-style: solid;
+            color: rgb(213, 211, 211);
+            display: inline-block;
         }
 
         pre {
@@ -54,6 +92,31 @@
             margin-top: 1rem;
             padding: 1rem 2.5rem 1rem 1rem;
         }
+
+        .code-example strong {
+            color: rgb(197, 169, 8);
+        }
+
+        .reserved {
+            color: rgb(12, 117, 215);
+        }
+
+        .brace {
+            color: rgb(165, 141, 6);
+        }
+
+        .functions {
+            color: rgb(192, 178, 99);
+        }
+
+        .quates {
+            color: rgb(113, 67, 43);
+        }
+
+        .comments {
+            color: rgb(6, 122, 27);
+        }
+
 
         .code-example,
         code,
@@ -70,6 +133,7 @@
             white-space: -o-pre-wrap;
             word-wrap: break-word;
             color: azure;
+            font-family: inherit;
         }
 
         button {
@@ -110,48 +174,84 @@
             xhr.open("GET", filePath, true);
             xhr.send();
         }
-        function bindFinctionClicked() {
-            bindFunction();
-            console.log("Testing button clicked.");
-        }
-        function protoChainingFunctionClicked() {
-            protoChainingFunction();
-            console.log("Testing button clicked.");
-        }
 
         function loadFunctions() {
+            window.main = {
+                questions: []
+            };
             loadFile("bind.js", function (responseText) {
                 // Display content in a <pre> element
                 const splitter = '//function';
+                const namedFunctionPattern = /function\s+(?<functionName>\w+)\s*\((?<arguments>[\s\w,]*)*\)\s*{(?<body>[^])*}/gm;
 
-                const clickFunctionsArray = [bindFinctionClicked, protoChainingFunctionClicked]
+
                 responseText.split(splitter).forEach((chunk, index) => {
-                    const funcName = chunk.match(/^\/{2}#[\w\s]+\s*$/gm).map(x => x.replace('//#', ''))[0];
-                    console.log('loaded Function', funcName);
-                    const code = document.createElement("div");
-                    code.setAttribute('class', 'code-example')
+                    const matches = `${chunk}`.matchAll(namedFunctionPattern);
+                    const groups = [...matches].map(x => x['groups']);
+                    const func = {
+                        name: groups[0]['functionName'],
+                        parameters: groups[0]['arguments'],
+                        body: groups[0]['body']
+                    };
 
-                    const codeHeader = document.createElement("p");
-                    codeHeader.setAttribute('class', 'example-header')
-                    codeHeader.textContent = funcName;
+                    const htmlChunk = chunk
+                        .replace(/[\s\W]+(const|let|var|function|if|for|while|do|Object|this|super)/gm,
+                            (x) => "<span class='reserved'>" + x + "</span>")
+                        .replace(func.name, `<strong>${func.name}</strong>`)
+                        // .replace(/(\'|")[.\s\w]*(\'|")/, (x) => `<span class='quates'>${x}</span>`)
+                        .replace(/\.[\w]*\s*\(/gm, (x) => `<span class='functions'>${x}</span>`)
+                        .replace(/[\(\)\{\}\[\]]/gm, (x) => `<span class='brace'>${x}</span>`)
+                        .replace(/\/{2}[\/\w\s\t\r\n]*$/, (x) => `<span class='comments'>${x}</span>`)
 
-                    code.appendChild(codeHeader)
+                    const question = {
+                        func: func,
+                        renderedCode: htmlChunk,
+                        code: chunk,
+                        executableCode: eval(`(${chunk})`),
+                        copy: function () {
+                            navigator.clipboard.writeText(chunk)
+                            alert(`Copied ${this.func.name} to clipboard.`);
+                        },
+                        render: function () {
+                            const code = document.createElement("div");
+                            code.setAttribute('class', 'code-example')
+
+                            const header = document.createElement("div");
+                            header.setAttribute('class', 'example-header')
+
+                            const codeHeader = document.createElement("p");
+                            codeHeader.setAttribute('class', 'example-header')
+                            codeHeader.innerHTML = `${this.func.name}`;
+
+                            header.append(codeHeader)
+
+                            const btnCopy = document.createElement("button");
+                            btnCopy.textContent = `Copy`
+                            btnCopy.setAttribute("class", "btn-copy")
+                            btnCopy.onclick = this.copy
+                            header.append(btnCopy)
+                            code.appendChild(header)
 
 
-                    const codeContent = document.createElement("pre");
-                    codeContent.setAttribute('class', 'brush: js notranslate')
-                    codeContent.textContent = chunk;
-                    code.appendChild(codeContent)
+                            const codeContent = document.createElement("pre");
+                            codeContent.setAttribute('class', 'brush: js notranslate')
+                            codeContent.innerHTML = `${this.renderedCode}`;
+                            code.appendChild(codeContent)
 
 
-                    let onclick = eval("(" + chunk + ")");
-                    const btnRun = document.createElement("button");
-                    btnRun.textContent = `run ${funcName} test`
-                    btnRun.onclick = onclick;
-                    code.appendChild(btnRun)
+                            // let onclick = eval(`(${chunk})`);
+                            const btnRun = document.createElement("button");
+                            btnRun.textContent = `run ${this.func.name} test`
+                            btnRun.onclick = this.executableCode;
+                            code.appendChild(btnRun)
 
-                    document.getElementById('codes').appendChild(code);
+                            document.getElementById('codes').appendChild(code);
+                        }
+                    }
+
+                    main.questions.push(question);
                 })
+                main.questions.forEach(x => x.render())
             });
         };
 

@@ -1,4 +1,4 @@
-//#number 1
+
 function number_1() {
     const person = { name: 'mh', greet: function (term) { console.log('hi ', this.name, term) } }
     person.greet('world');
@@ -6,9 +6,9 @@ function number_1() {
     personGreet('world');
     const boundPresonGreet = person.greet.bind(person);
     boundPresonGreet('currect');
+    // hi there
 }
 //function
-//#number 2
 function number_2() {
     const human = { name: undefined, talk: function (term) { return `${this.name ?? 'human'} is saying ${term}` } };
     const iranianPerson = { name: 'mohammad', talk(term) { console.log(`${super.talk(term)} in persian`) }, __proto__: human };
@@ -18,8 +18,7 @@ function number_2() {
     englishPerson.talk('hi there');
     unknownPerson.talk('');
 }
-//function
-//#number 3 
+//function 
 function number_3() {
     (function iifi_function(params) {
         console.log(params);
@@ -27,15 +26,13 @@ function number_3() {
 }
 
 //function
-//#number 4
 function number_4() {
     let a = 10;
     x = a;
     console.log(x);
 }
 
-//function
-//#number 5 
+//function 
 function number_5() {
     const env = { apiUrl: 'https://google.com', version: 'v1', platforms: 'server' }
     const env2 = { apiUrl: 'https://google.com', version: 'v1', platforms: 'server' }
@@ -47,8 +44,7 @@ function number_5() {
 
 }
 
-//function
-//#number 6 
+//function 
 function number_6() {
     const values = [
         "",
@@ -69,8 +65,7 @@ function number_6() {
 
 }
 
-//function
-//#number 7 
+//function 
 function number_7() {
     const x = undefined;
     const z = null;
@@ -82,8 +77,7 @@ function number_7() {
 
 
 
-//function
-//#number 8 
+//function 
 function number_8() {
     const interatable = function* (start, end, step) {
         let i = 0;
@@ -95,24 +89,34 @@ function number_8() {
     }
 
     console.log(interatable(0, 10, 1));
+    console.log([...interatable(0, 10, 1)]);
 }
 
 
-//function
-//#number 9 
+//function 
 function number_9() {
-    const clock = function (callback, interval) {
-        callback();
+    const customDelay = function (callback, delay) {
+        let start = null;
+        let id = null;
+        function animate(timestamp) {
+            if (!start) start = timestamp;
+            const elapsed = timestamp - start;
+            if (elapsed < delay) {
+                id = requestAnimationFrame(animate);
+            } else {
+                callback();
+                cancelAnimationFrame(id)
+            }
+        }
+
+        id = requestAnimationFrame(animate);
     }
 
-    clock(function () {
-        console.log('mi', new Date().getSeconds());
-    }, 1000);
+    customDelay(() => console.log("Hello World! after customDelay"), 2500);
 }
 
 
 //function
-//#number 10 
 function number_10() {
     const obj = {
         level: 1,
@@ -129,7 +133,7 @@ function number_10() {
                         return console.log;
                 }
             },
-        
+
         print: (term) => {
             this.logger()(term);
         },
@@ -140,19 +144,13 @@ function number_10() {
     try {
         obj.print('print');
     } catch (error) {
-        console.info('there is an error : ',error)
+        console.info('there is an error : ', error)
     }
     try {
         obj.printAdvanced('printAdvanced');
     } catch (error) {
-        console.info('there is an error : ',error)
+        console.info('there is an error : ', error)
     }
-    
+
 }
 
-
-//function
-//#number 11
-function number_11() {
-    
-}
